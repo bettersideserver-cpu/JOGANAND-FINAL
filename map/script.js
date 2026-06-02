@@ -20,16 +20,16 @@ const LOCATION_CONFIGS = {
         name: "Joganad",
         coords: [74.9544167, 30.2478333],
         modelUrl: "model.glb",
-        zoom: 15.5,
+        zoom: 15.9,
 
         url: "IPX/index.html", // 🔥 ADD THIS
 
-        cameraOffset: [300, 100],
+        cameraOffset: [450, 260],
 
         transform: {
-          position: [200, -700, -70],
-          rotation: [Math.PI / 2, -Math.PI / 2, 0],
-          scale: [.5, .5, .5],
+          position: [260, -490, -70],
+          rotation: [Math.PI / 2, -Math.PI / 2 + (-5 * Math.PI / 180), 0],
+          scale: [.45, .45, .45],
           maxZoom: 23
         }
       }
@@ -186,7 +186,13 @@ window.onload = () => {
         {
           id: "satellite",
           type: "raster",
-          source: "satellite"
+          source: "satellite",
+          paint: {
+            "raster-brightness-max": 1,
+            "raster-brightness-min": 0,
+            "raster-saturation": 0,
+            "raster-contrast": 0.1
+          }
         },
 
         // roads overlay
@@ -522,7 +528,7 @@ function setupThreeLayer() {
 
         const mercator = maplibregl.MercatorCoordinate.fromLngLat(
           currentProject.coords,
-          50
+          100
         );
 
         const scale = mercator.meterInMercatorCoordinateUnits();
@@ -1052,9 +1058,9 @@ function clearFilter() {
       zoom: currentProject.zoom || 17,
       pitch: 0,
       bearing: 90,
-  offset: currentProject.cameraOffset || [0, 0],
+      offset: currentProject.cameraOffset || [0, 0],
       duration: 1500
-      
+
     });
   }
 }
@@ -1132,60 +1138,60 @@ async function searchNearby(type, btn) {
 
     results.forEach(place => {
 
-  // Airport cleanup
-  if (type === "airport") {
+      // Airport cleanup
+      if (type === "airport") {
 
-    const name = place.name.toLowerCase();
+        const name = place.name.toLowerCase();
 
-    if (
-      name.includes("taxi") ||
-      name.includes("cab") ||
-      name.includes("travel") ||
-      name.includes("driver") ||
-      name.includes("hotel")
-    ) {
-      return;
-    }
-  }
+        if (
+          name.includes("taxi") ||
+          name.includes("cab") ||
+          name.includes("travel") ||
+          name.includes("driver") ||
+          name.includes("hotel")
+        ) {
+          return;
+        }
+      }
 
-  const lat = place.geometry.location.lat();
-  const lng = place.geometry.location.lng();
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
 
-  // Select icon
-  let icon = "icons/default.svg";
+      // Select icon
+      let icon = "icons/default.svg";
 
-  switch (type) {
+      switch (type) {
 
-    case "hospital":
-      icon = "icons/hospital.svg";
-      break;
+        case "hospital":
+          icon = "icons/hospital.svg";
+          break;
 
-    case "school":
-      icon = "icons/school.svg";
-      break;
+        case "school":
+          icon = "icons/school.svg";
+          break;
 
-    case "mall":
-      icon = "icons/mall.svg";
-      break;
+        case "mall":
+          icon = "icons/mall.svg";
+          break;
 
-    case "airport":
-      icon = "icons/airport.svg";
-      break;
+        case "airport":
+          icon = "icons/airport.svg";
+          break;
 
-    case "dmart":
-      icon = "icons/dmart.svg";
-      break;
+        case "dmart":
+          icon = "icons/dmart.svg";
+          break;
 
-    case "reliance":
-      icon = "icons/reliance.svg";
-      break;
-  }
+        case "reliance":
+          icon = "icons/reliance.svg";
+          break;
+      }
 
-  // Create marker element
-  const el = document.createElement("div");
-  el.className = "nearby-marker";
+      // Create marker element
+      const el = document.createElement("div");
+      el.className = "nearby-marker";
 
-  el.innerHTML = `
+      el.innerHTML = `
     <img
       src="${icon}"
       alt="${type}"
@@ -1194,39 +1200,39 @@ async function searchNearby(type, btn) {
     >
   `;
 
-  // Create marker
-  const marker = new maplibregl.Marker({
-    element: el
-  })
-    .setLngLat([lng, lat])
-    .setPopup(
-      new maplibregl.Popup().setHTML(
-        `<b>${place.name}</b><br>${place.vicinity || ""}`
-      )
-    )
-    .addTo(map);
+      // Create marker
+      const marker = new maplibregl.Marker({
+        element: el
+      })
+        .setLngLat([lng, lat])
+        .setPopup(
+          new maplibregl.Popup().setHTML(
+            `<b>${place.name}</b><br>${place.vicinity || ""}`
+          )
+        )
+        .addTo(map);
 
-  // Click marker → draw route
-  marker.getElement().onclick = async () => {
+      // Click marker → draw route
+      marker.getElement().onclick = async () => {
 
-    const start = currentProject.coords;
-    const end = [lng, lat];
+        const start = currentProject.coords;
+        const end = [lng, lat];
 
-    const route = await getRoute(start, end);
+        const route = await getRoute(start, end);
 
-    drawRoute(
-      route.geometry,
-      route.distance,
-      route.duration,
-      start,
-      end
-    );
-  };
+        drawRoute(
+          route.geometry,
+          route.distance,
+          route.duration,
+          start,
+          end
+        );
+      };
 
-  nearbyMarkers.push(marker);
-  bounds.extend([lng, lat]);
+      nearbyMarkers.push(marker);
+      bounds.extend([lng, lat]);
 
-});
+    });
 
     map.fitBounds(bounds, {
       padding: 100,
