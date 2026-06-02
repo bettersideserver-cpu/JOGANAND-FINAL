@@ -573,8 +573,8 @@
     <path class="plot-shape" data-plot="plot-4241" d="m2344.58 991.41-56.28.67-6.92-110.37 55.98-.65z"/>
     <path class="plot-shape" data-plot="plot-4240" d="m2288.3 992.08-56.94.68-5.2-110.4 55.22-.65z"/>
     <path class="plot-shape" data-plot="plot-4191" d="m2281.38 881.71-55.22.65-5.11-108.67 53.51-.64z"/>
-    <path class="plot-shape" data-plot="plot-4239" d="m2226.16 882.36-55.02.64-4.99-108.65 54.9-.66z"/>
-    <path class="plot-shape" data-plot="plot-4239b" d="m2231.36 992.76-55.14.65-5.08-110.41 55.02-.64z"/>
+    <path class="plot-shape" data-plot="plot-4192" d="m2226.16 882.36-55.02.64-4.99-108.65 54.9-.66z"/>
+    <path class="plot-shape" data-plot="plot-4239" d="m2231.36 992.76-55.14.65-5.08-110.41 55.02-.64z"/>
     <path class="plot-shape" data-plot="plot-4238" d="m2176.22 993.41-56.1.67-4.68-110.42 55.7-.66z"/>
     <path class="plot-shape" data-plot="plot-4193" d="m2171.14 883-55.7.66-4.6-108.65 55.31-.66z"/>
     <path class="plot-shape" data-plot="plot-4194" d="m2115.44 883.66-55.91.65-3.6-108.64 54.91-.66z"/>
@@ -1164,7 +1164,32 @@
         }
       }, { passive: false });
     });
-  </script>
+  
+    // ── Arrival highlight: show the plot we navigated from ──
+    (function() {
+      try {
+        var arrivalPlot = sessionStorage.getItem('yoganadArrivalPlot');
+        if (!arrivalPlot) return;
+        sessionStorage.removeItem('yoganadArrivalPlot');
+        var shape = document.querySelector('.plot-shape[data-plot="' + arrivalPlot + '"]');
+        if (!shape) return;
+        shape.classList.add('active');
+        var svg = document.getElementById('svgMap');
+        if (svg && typeof openPanel === 'function') {
+          var bb = shape.getBBox();
+          var rect = svg.getBoundingClientRect();
+          var vbW = svg.viewBox.baseVal.width || 3840;
+          var vbH = svg.viewBox.baseVal.height || 2160;
+          var scaleX = rect.width / vbW;
+          var scaleY = rect.height / vbH;
+          var screenX = rect.left + (bb.x + bb.width / 2) * scaleX;
+          setTimeout(function() {
+            openPanel(arrivalPlot, Math.min(screenX + 14, window.innerWidth - 320));
+          }, 150);
+        }
+      } catch(e) {}
+    })();
+</script>
 
   <div class="mobile-hint" id="mobileHint">Tap a plot &middot; Pinch to zoom</div>
 </body>

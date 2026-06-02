@@ -22,7 +22,7 @@
     /* ── Mobile portrait optimizations (does NOT affect desktop) ── */
     @media (max-width: 768px) and (orientation: portrait) {
       .env-bar        { bottom: 80px; min-width: 90vw; gap: 4px; }
-      .env-slider-wrap{ width: 90vw; padding: 10px 16px; }
+      .env-slider-wrap{ width: 100%; padding: 10px 16px; box-sizing: border-box; }
       .slider-ticks   { width: 90vw; }
       :root           { --tick-offset: 28px; }
       .section-display .sd-name { font-size: 22px; }
@@ -42,24 +42,22 @@
       }
     }
 
-    /* Bigger touch target on coarse-pointer (mobile) only */
+    /* Touch target fixes on coarse-pointer (mobile) only */
     @media (pointer: coarse) {
-      input[type=range].env-range {
-        touch-action: pan-x;
-        height: 4px !important;        /* thicker track */
-      }
-      input[type=range].env-range::-webkit-slider-thumb {
-        width: 36px !important;
-        height: 36px !important;
-      }
-      input[type=range].env-range::-moz-range-thumb {
-        width: 36px !important;
-        height: 36px !important;
-      }
-      /* Expand the slider wrap for easier reach in landscape */
-      .env-slider-wrap {
-        padding: 14px 20px !important;
-      }
+      .ui-toggle-btn, #uiToggleBtn { display: none !important; }
+      input[type=range].env-range { touch-action: pan-x; -webkit-appearance: none; appearance: none; height: 6px !important; border-radius: 3px !important; width: 100% !important; flex: 1 !important; min-width: 0 !important; }
+      input[type=range].env-range::-webkit-slider-runnable-track { height: 6px !important; border-radius: 3px !important; width: 100% !important; }
+      input[type=range].env-range::-moz-range-track { height: 6px !important; border-radius: 3px !important; width: 100% !important; }
+      input[type=range].env-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px !important; height: 22px !important; margin-top: -8px !important; }
+      input[type=range].env-range::-moz-range-thumb { width: 22px !important; height: 22px !important; }
+      .env-slider-wrap { padding: 14px 16px !important; width: 100% !important; box-sizing: border-box !important; display: flex !important; align-items: center !important; gap: 10px !important; }
+    }
+    /* Mobile landscape: hide "Show Controls" btn, widen slider */
+    @media (orientation: landscape) and (pointer: coarse) {
+      .ui-toggle-btn, #uiToggleBtn { display: none !important; }
+      #envBar { min-width: 96vw !important; width: 96vw !important; }
+      #envBar .env-slider-wrap { width: 96vw !important; padding: 10px 8px !important; max-width: 96vw !important; }
+      #sliderTicks { width: 96vw !important; }
     }
 
     /* iOS tap highlight suppression */
@@ -259,6 +257,7 @@
     document.getElementById('bottomNav').addEventListener('click', e => {
       const item = e.target.closest('.nav-item');
       if (!item) return;
+      if (item.id === 'nav-home') { window.location.href = 'index.html'; return; }
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       item.classList.add('active');
     });
@@ -270,6 +269,8 @@
     const uiToggleBtn = document.getElementById('uiToggleBtn');
     let uiHideTimer = null, uiVisible = true;
     const isMobileLandscape = () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight;
+    // Hide toggle button on mobile
+    if (IS_MOBILE) { uiToggleBtn.style.display = 'none'; }
     function hideUI() {
       if (!isMobileLandscape()) return;
       bottomNav.classList.add('ui-hidden');
