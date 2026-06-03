@@ -292,10 +292,24 @@ function setupProjects() {
     const el = document.createElement('div');
     el.className = 'marker-wrapper';
 
-    el.innerHTML = `
-  <div class="marker-dot"></div>
+el.innerHTML = `
+  <div class="marker-dot" style="
+    width:auto; height:auto;
+    padding:6px 12px;
+    border-radius:6px;
+    background: linear-gradient(135deg, rgba(30,80,40,0.95), rgba(15,50,25,0.98));
+    border: 1.5px solid rgba(200,175,120,0.6);
+    font-family:'Cormorant Garamond',serif;
+    font-size:14px; font-weight:700;
+    color:rgba(200,175,120,1);
+    letter-spacing:0.1em; white-space:nowrap;
+    text-shadow: 0 0 10px rgba(200,175,120,0.6);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(200,175,120,0.15);
+  ">HG Group</div>
   <button class="explore-btn">Explore Joganand</button>
 `;
+
+
 
     new maplibregl.Marker({ element: el })
       .setLngLat(project.coords)
