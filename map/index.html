@@ -1788,6 +1788,70 @@
       }
     }
 
+
+    /* ═══════════════════════════════════════════════
+       MOBILE LANDSCAPE — MARKER, HUD, ROADS TOGGLE FIXES
+       ═══════════════════════════════════════════════ */
+    @media (orientation: landscape) and (max-height: 520px) {
+
+      /* ── Shrink nearby marker SVG icons ── */
+      .nearby-marker {
+        width: 22px !important;
+        height: 22px !important;
+        box-shadow:
+          0 4px 12px rgba(0,0,0,.35),
+          0 0 0 2px rgba(200,175,120,0.3) !important;
+      }
+
+      .nearby-marker img {
+        width: 18px !important;
+        height: 18px !important;
+      }
+
+      /* Also shrink plain .marker dots */
+      .marker {
+        width: 10px !important;
+        height: 10px !important;
+      }
+
+      /* ── DELETE Route Analysis HUD entirely on mobile ── */
+      #distanceHud {
+        display: none !important;
+      }
+
+      /* ── Roads ON/OFF toggle — fix colour + remove odd vertical line ── */
+      #roadToggle {
+        background: rgba(10,9,7,0.92) !important;
+        border: 1px solid rgba(200,175,120,0.28) !important;
+        color: rgba(200,175,120,0.85) !important;
+        border-radius: 20px !important;
+        padding: 7px 13px !important;
+        font-size: 9px !important;
+        gap: 6px !important;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.4) !important;
+      }
+
+      #roadToggle:hover {
+        background: rgba(20,18,14,0.96) !important;
+        border-color: rgba(200,175,120,0.55) !important;
+        color: rgba(200,175,120,1.0) !important;
+      }
+
+      /* rdot — keep green but correct size */
+      .rdot {
+        width: 5px !important;
+        height: 5px !important;
+        flex-shrink: 0 !important;
+        border: none !important;
+      }
+
+      /* Remove any stray vertical separator inside roadToggle */
+      #roadToggle::before,
+      #roadToggle::after {
+        display: none !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -2199,7 +2263,7 @@
        We pull it back to 11 after the map loads.
     */
     (function() {
-      var MOBILE_ZOOM = 9; // comfortable zoom for mobile landscape
+      var MOBILE_ZOOM = 7; // comfortable zoom for mobile landscape
 
       var isMobileLandscape = function() {
         return window.screen.width <= 926 &&   // common phone landscape widths
