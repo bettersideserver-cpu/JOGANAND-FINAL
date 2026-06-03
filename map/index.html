@@ -1687,6 +1687,107 @@
       }
     }
 
+
+    /* ═══════════════════════════════════════════════
+       MOBILE LANDSCAPE — EXTRA FIXES (popup, hud, chip, zoom)
+       ═══════════════════════════════════════════════ */
+    @media (orientation: landscape) and (max-height: 520px) {
+
+      /* ── Route Analysis HUD: smaller, dark gold theme ── */
+      #distanceHud {
+        min-width: 150px !important;
+        max-width: 170px !important;
+        border-radius: 10px !important;
+      }
+
+      .hud-header {
+        padding: 7px 11px 6px !important;
+      }
+
+      .hud-label {
+        font-size: 7.5px !important;
+        letter-spacing: 0.18em !important;
+      }
+
+      .hud-tag {
+        font-size: 7px !important;
+        padding: 2px 6px !important;
+      }
+
+      .hud-body {
+        padding: 8px 11px !important;
+        gap: 7px !important;
+      }
+
+      .hud-val {
+        font-size: 20px !important;
+      }
+
+      .hud-unit {
+        font-size: 8px !important;
+      }
+
+      .hud-lbl {
+        font-size: 9px !important;
+      }
+
+      /* hide elevation chart on mobile — saves space */
+      .hud-chart {
+        display: none !important;
+      }
+
+      /* ── Distance/Time text chip (bottom-left injected text) ── */
+      /* This is the plain text node injected by the MutationObserver
+         matching "Distance: X km / Time: X min" — it lives inside #distanceHud */
+
+      /* ── MapLibre popup: dark gold theme, smaller ── */
+      .maplibregl-popup-content {
+        background: rgba(15,13,10,0.95) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(200,175,120,0.25) !important;
+        border-radius: 10px !important;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.55) !important;
+        padding: 9px 12px !important;
+        max-width: 200px !important;
+        color: rgba(235,225,200,0.9) !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-size: 11px !important;
+        line-height: 1.4 !important;
+      }
+
+      .maplibregl-popup-content b {
+        font-size: 11.5px !important;
+        font-weight: 600 !important;
+        color: rgba(200,175,120,1.0) !important;
+        display: block !important;
+        margin-bottom: 3px !important;
+      }
+
+      .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+        border-top-color: rgba(15,13,10,0.95) !important;
+      }
+
+      .maplibregl-popup-anchor-top .maplibregl-popup-tip {
+        border-bottom-color: rgba(15,13,10,0.95) !important;
+      }
+
+      .maplibregl-popup-close-button {
+        color: rgba(200,175,120,0.7) !important;
+        font-size: 14px !important;
+        top: 4px !important;
+        right: 6px !important;
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+
+      .maplibregl-popup-close-button:hover {
+        color: rgba(200,175,120,1.0) !important;
+        background: none !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -1698,7 +1799,7 @@
 
 
   <!-- HOME BUTTON -->
-  <a id="homeBtn" href="index.html" title="Back to Home">
+  <a id="homeBtn" href="index.html?from=map&overlay=overlay.jpg" title="Back to Home">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/>
       <polyline points="9 21 9 12 15 12 15 21"/>
@@ -2098,7 +2199,7 @@
        We pull it back to 11 after the map loads.
     */
     (function() {
-      var MOBILE_ZOOM = 11; // comfortable zoom for mobile landscape
+      var MOBILE_ZOOM = 9; // comfortable zoom for mobile landscape
 
       var isMobileLandscape = function() {
         return window.screen.width <= 926 &&   // common phone landscape widths
