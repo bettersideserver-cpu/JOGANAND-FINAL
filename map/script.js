@@ -305,7 +305,7 @@ el.innerHTML = `
     letter-spacing:0.1em; white-space:nowrap;
     text-shadow: 0 0 10px rgba(200,175,120,0.6);
     box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(200,175,120,0.15);
-  ">HG Group</div>
+  ">JOGANAND</div>
   <button class="explore-btn">Explore Joganand</button>
 `;
 
