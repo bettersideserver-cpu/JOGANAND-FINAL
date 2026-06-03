@@ -2279,34 +2279,54 @@
 
   <script>
     /* ═══ MOBILE LANDSCAPE: fix initial map zoom ═══
-       script.js uses global `map` (let map = new maplibregl.Map...)
-       On mobile landscape the default zoom 15.9 is far too close.
-       We pull it back to 11 after the map loads.
+       Intercepts maplibregl.Map constructor so zoom is forced
+       regardless of whether script.js exposes window.map.
     */
     (function() {
-      var MOBILE_ZOOM = 5; // comfortable zoom for mobile landscape
+      var MOBILE_ZOOM = 0;
 
       var isMobileLandscape = function() {
-        return window.screen.width <= 926 &&   // common phone landscape widths
-               window.innerHeight < 500 &&
-               window.innerWidth > window.innerHeight;
+        return window.innerHeight < 500 && window.innerWidth > window.innerHeight;
       };
 
-      function fixMobileZoom() {
-        if (!isMobileLandscape()) return;
-        var m = window.map; // script.js exposes it as global `map`
-        if (!m || typeof m.getZoom !== 'function') return;
-        m.easeTo({ zoom: MOBILE_ZOOM, duration: 400 });
+      // Wait for maplibregl to be defined, then patch its Map constructor
+      function patchMapLibre() {
+        if (typeof maplibregl === 'undefined') {
+          setTimeout(patchMapLibre, 100);
+          return;
+        }
+        var OrigMap = maplibregl.Map;
+        maplibregl.Map = function(options) {
+          if (isMobileLandscape() && options && options.zoom !== undefined) {
+            options.zoom = MOBILE_ZOOM;
+          }
+          var instance = new OrigMap(options);
+          // Also store globally as fallback
+          window.map = instance;
+          // Re-apply after load in case zoom gets reset
+          instance.on('load', function() {
+            if (isMobileLandscape()) {
+              instance.jumpTo({ zoom: MOBILE_ZOOM });
+            }
+          });
+          return instance;
+        };
+        maplibregl.Map.prototype = OrigMap.prototype;
+        // Copy static props
+        Object.keys(OrigMap).forEach(function(k) {
+          maplibregl.Map[k] = OrigMap[k];
+        });
       }
 
-      // After full load + a short delay for script.js map init
-      window.addEventListener('load', function() {
-        setTimeout(fixMobileZoom, 1000);
-      });
+      patchMapLibre();
 
-      // Orientation flip
+      // Orientation flip fallback
       window.addEventListener('orientationchange', function() {
-        setTimeout(fixMobileZoom, 700);
+        setTimeout(function() {
+          if (isMobileLandscape() && window.map && window.map.easeTo) {
+            window.map.jumpTo({ zoom: MOBILE_ZOOM });
+          }
+        }, 700);
       });
     })();
   </script>
