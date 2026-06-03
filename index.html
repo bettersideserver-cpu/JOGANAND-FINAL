@@ -3313,6 +3313,49 @@
 
   <script>
   (function(){
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('from') === 'map') {
+      var doSkip = function() {
+        var removeEl = function(id) {
+          var el = document.getElementById(id);
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        };
+        removeEl('loadingScreen');
+        removeEl('exploreOverlay');
+
+        // Stop + remove intro video
+        var iv = document.getElementById('introVideo');
+        if (iv) {
+          iv.pause();
+          iv.removeAttribute('src');
+          iv.load();
+          if (iv.parentNode) iv.parentNode.removeChild(iv);
+        }
+
+        document.body.classList.remove('intro-active');
+
+        // Show overlay image
+        var overlayFile = params.get('overlay');
+        if (overlayFile) {
+          var img = document.getElementById('optionOverlayImg');
+          if (img) {
+            img.src = overlayFile;
+            img.classList.add('visible');
+          }
+        }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', doSkip);
+      } else {
+        doSkip();
+      }
+    }
+  })();
+  </script>
+
+  <script>
+  (function(){
     window._lsStartTime = Date.now();
     window._lsBarFill = document.getElementById('ls-bar-fill-el');
   })();
