@@ -41,9 +41,8 @@
     /* ── Play/Pause button — above bottom nav, centered ── */
     #playPauseBtn {
       position: fixed;
-      bottom: 80px; /* sits just above the bottom nav bar */
-      left: 50%;
-      transform: translateX(-50%);
+      bottom: 80px;
+      left: 24px;
       z-index: 900;
       width: 52px;
       height: 52px;
@@ -63,11 +62,13 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Mobile: smaller button */
+    /* Mobile: smaller button, force circle */
     @media (max-width: 768px) {
       #playPauseBtn {
         width: 40px;
         height: 40px;
+        border-radius: 50% !important;
+        left: 16px;
       }
       #playPauseBtn svg {
         width: 16px;
@@ -85,8 +86,50 @@
     }
 
     #playPauseBtn:active {
-      transform: translateX(-50%) scale(0.91);
+      transform: scale(0.91);
       background: rgba(180, 145, 70, 0.25);
+    }
+
+    /* Mobile: Home nav item — circle shape, icon only */
+    @media (max-width: 768px) {
+      .bottom-nav #nav-home {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        font-size: 0 !important; /* hide "Home" text */
+        background: rgba(200, 175, 120, 0.12);
+        border: 1px solid rgba(200, 175, 120, 0.4);
+        box-shadow: 0 0 12px rgba(200, 175, 120, 0.08);
+        overflow: hidden;
+      }
+      .bottom-nav #nav-home.active {
+        background: rgba(200, 175, 120, 0.22);
+        border-color: rgba(200, 175, 120, 0.7);
+      }
+      .bottom-nav #nav-home .nav-icon {
+        width: 20px;
+        height: 20px;
+        margin: 0;
+      }
+      /* Make bottom nav transparent so only the circle shows */
+      .bottom-nav {
+        background: transparent !important;
+        border: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: none !important;
+        justify-content: center !important;
+        pointer-events: none;
+      }
+      .bottom-nav .nav-item {
+        pointer-events: auto;
+      }
     }
 
     #playPauseBtn svg {
@@ -141,7 +184,7 @@
     <canvas id="bgCanvas" class="bg-canvas"></canvas>
   </div>
 
-  <!-- Full-screen autoplay video -->
+  <!-- Full-screen autoplay video (no loop — plays once then stops) -->
   <video
     id="bgVideo"
     src="Subpages/garden-1/scrub.mp4"
@@ -152,14 +195,14 @@
     preload="auto"
   ></video>
 
-  <!-- Centered Play / Pause button -->
+  <!-- Play / Pause button — centered above bottom nav -->
   <button id="playPauseBtn" aria-label="Play / Pause" title="Play / Pause">
     <!-- Pause icon (shown while playing) -->
     <svg id="iconPause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none"/>
       <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none"/>
     </svg>
-    <!-- Play icon (shown while paused) -->
+    <!-- Play icon (shown while paused / ended) -->
     <svg id="iconPlay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
       <polygon points="5,3 19,12 5,21" fill="currentColor" stroke="none"/>
     </svg>
@@ -229,18 +272,18 @@
     const IS_IOS    = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     // ═══════════════════════════════════════════════════
-    // VIDEO SETUP
+    // VIDEO + PLAY/PAUSE
     // ═══════════════════════════════════════════════════
-    const bgVideo      = document.getElementById('bgVideo');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const iconPlay     = document.getElementById('iconPlay');
-    const iconPause    = document.getElementById('iconPause');
+    const bgVideo       = document.getElementById('bgVideo');
+    const playPauseBtn  = document.getElementById('playPauseBtn');
+    const iconPlay      = document.getElementById('iconPlay');
+    const iconPause     = document.getElementById('iconPause');
     const iosTapOverlay = document.getElementById('iosTapOverlay');
-    const iosTapBtn    = document.getElementById('iosTapBtn');
-    const loaderEl     = document.getElementById('siteLoader');
-    const loaderFill   = document.getElementById('loaderFill');
-    const loaderPct    = document.getElementById('loaderPct');
-    const loadBar      = document.getElementById('loadBar');
+    const iosTapBtn     = document.getElementById('iosTapBtn');
+    const loaderEl      = document.getElementById('siteLoader');
+    const loaderFill    = document.getElementById('loaderFill');
+    const loaderPct     = document.getElementById('loaderPct');
+    const loadBar       = document.getElementById('loadBar');
 
     function updatePlayPauseIcons() {
       if (bgVideo.paused) {
@@ -265,7 +308,7 @@
     bgVideo.addEventListener('play',  updatePlayPauseIcons);
     bgVideo.addEventListener('pause', updatePlayPauseIcons);
 
-    // Video ends — stop and show play icon
+    // Video ends — stop on last frame, show play icon
     bgVideo.addEventListener('ended', () => {
       bgVideo.pause();
       updatePlayPauseIcons();
@@ -273,17 +316,14 @@
 
     updatePlayPauseIcons();
 
-    // ── Loader: 3s minimum + video can play ──
+    // ── Loader: 3s minimum ──
     let timerDone = false;
-    let videoDone = false;
-
     const LOADER_MS   = 3000;
     const loaderStart = performance.now();
 
     function tickLoader() {
-      const elapsed  = performance.now() - loaderStart;
-      const timePct  = Math.min(elapsed / LOADER_MS, 1);
-      // Also use video buffer progress if available
+      const elapsed = performance.now() - loaderStart;
+      const timePct = Math.min(elapsed / LOADER_MS, 1);
       let bufPct = 0;
       if (bgVideo.buffered.length && bgVideo.duration) {
         bufPct = bgVideo.buffered.end(bgVideo.buffered.length - 1) / bgVideo.duration;
@@ -296,10 +336,8 @@
     requestAnimationFrame(tickLoader);
 
     setTimeout(() => { timerDone = true; tryHideLoader(); }, LOADER_MS);
-
-    bgVideo.addEventListener('canplaythrough', () => { videoDone = true; tryHideLoader(); });
-    // Fallback: hide loader on first play event even if canplaythrough is late
-    bgVideo.addEventListener('playing', () => { videoDone = true; tryHideLoader(); });
+    bgVideo.addEventListener('canplaythrough', tryHideLoader);
+    bgVideo.addEventListener('playing',        tryHideLoader);
 
     function tryHideLoader() {
       if (!timerDone) return;
@@ -317,11 +355,10 @@
       }, 200);
     }
 
-    // ── iOS: autoplay may be blocked — show tap overlay ──
+    // ── iOS autoplay blocked → tap overlay ──
     const playPromise = bgVideo.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
-        // Blocked — hide loader, show tap overlay
         if (loaderEl) {
           loaderEl.style.opacity = '0';
           loaderEl.style.pointerEvents = 'none';

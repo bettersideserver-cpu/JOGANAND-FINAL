@@ -643,3 +643,58 @@
     .nav-item .nav-icon { width: 18px; height: 18px; }
     .bottom-nav { padding: 0 4px; }
   }
+
+/* --- MOBILE: Home button circle only --- */
+@media (max-width: 768px) {
+  /* Strip the full-width slab */
+  .bottom-nav {
+    background: transparent !important;
+    border-top: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none;
+  }
+
+  /* Re-enable clicks only on nav items */
+  .bottom-nav .nav-item {
+    pointer-events: auto;
+    flex: none;
+  }
+
+  /* Circle shape for home button */
+  .bottom-nav #nav-home {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-direction: column !important;
+    font-size: 0 !important;
+    background: rgba(6, 5, 4, 0.85) !important;
+    border: 1px solid rgba(200, 175, 120, 0.4) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+    overflow: hidden;
+  }
+
+  .bottom-nav #nav-home.active {
+    border-color: rgba(200, 175, 120, 0.7) !important;
+    background: rgba(20, 16, 8, 0.9) !important;
+  }
+
+  .bottom-nav #nav-home .nav-icon {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    opacity: 1;
+  }
+}
