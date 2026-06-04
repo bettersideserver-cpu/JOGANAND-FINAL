@@ -9,20 +9,12 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Jost:wght@200;300;400;500&family=Cinzel:wght@400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="Subpages/garden-1/styles.css">
+  <link rel="stylesheet" href="Subpages/garden-2/styles.css">
 
-  <link rel="preload" as="video" href="Subpages/garden-1/scrub.mp4" crossorigin>
+  <link rel="preload" as="video" href="Subpages/garden-2/scrubbb.mp4" crossorigin>
 
   <style>
-    /* ── Safe-area insets for notched phones ── */
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      @media (max-width: 768px) {
-        .bottom-nav {
-          padding-bottom: env(safe-area-inset-bottom);
-          height: calc(68px + env(safe-area-inset-bottom));
-        }
-      }
-    }
+    /* safe-area: handled by JS circle button */
 
     /* iOS tap highlight suppression */
     @media (pointer: coarse) { * { -webkit-tap-highlight-color: transparent; } }
@@ -41,9 +33,8 @@
     /* ── Play/Pause button — above bottom nav, centered ── */
     #playPauseBtn {
       position: fixed;
-      bottom: 80px; /* sits just above the bottom nav bar */
-      left: 50%;
-      transform: translateX(-50%);
+      bottom: 80px;
+      left: 24px;
       z-index: 900;
       width: 52px;
       height: 52px;
@@ -63,11 +54,13 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Mobile: smaller button */
+    /* Mobile: smaller button, force circle */
     @media (max-width: 768px) {
       #playPauseBtn {
         width: 40px;
         height: 40px;
+        border-radius: 50% !important;
+        left: 16px;
       }
       #playPauseBtn svg {
         width: 16px;
@@ -85,9 +78,11 @@
     }
 
     #playPauseBtn:active {
-      transform: translateX(-50%) scale(0.91);
+      transform: scale(0.91);
       background: rgba(180, 145, 70, 0.25);
     }
+
+
 
     #playPauseBtn svg {
       width: 22px;
@@ -141,10 +136,10 @@
     <canvas id="bgCanvas" class="bg-canvas"></canvas>
   </div>
 
-  <!-- Full-screen autoplay video -->
+  <!-- Full-screen autoplay video (no loop — plays once then stops) -->
   <video
     id="bgVideo"
-    src="Subpages/garden-1/scrub.mp4"
+    src="Subpages/garden-2/scrubbb.mp4"
     autoplay
     muted
     playsinline
@@ -152,14 +147,14 @@
     preload="auto"
   ></video>
 
-  <!-- Centered Play / Pause button -->
+  <!-- Play / Pause button — centered above bottom nav -->
   <button id="playPauseBtn" aria-label="Play / Pause" title="Play / Pause">
     <!-- Pause icon (shown while playing) -->
     <svg id="iconPause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none"/>
       <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none"/>
     </svg>
-    <!-- Play icon (shown while paused) -->
+    <!-- Play icon (shown while paused / ended) -->
     <svg id="iconPlay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
       <polygon points="5,3 19,12 5,21" fill="currentColor" stroke="none"/>
     </svg>
@@ -211,15 +206,8 @@
     </svg>
   </div>
 
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav" id="bottomNav">
-    <div class="nav-item active" id="nav-home">
-      <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3">
-        <path d="M3 9.5L10 3l7 6.5V18H13v-4.5H7V18H3V9.5z" />
-      </svg>
-      Home
-    </div>
-  </div>
+  <!-- BOTTOM NAV: injected by JS (desktop=full bar, mobile=circle) -->
+  <div id="bottomNavContainer"></div>
 
   <script>
     // ═══════════════════════════════════════════════════
@@ -229,18 +217,18 @@
     const IS_IOS    = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     // ═══════════════════════════════════════════════════
-    // VIDEO SETUP
+    // VIDEO + PLAY/PAUSE
     // ═══════════════════════════════════════════════════
-    const bgVideo      = document.getElementById('bgVideo');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const iconPlay     = document.getElementById('iconPlay');
-    const iconPause    = document.getElementById('iconPause');
+    const bgVideo       = document.getElementById('bgVideo');
+    const playPauseBtn  = document.getElementById('playPauseBtn');
+    const iconPlay      = document.getElementById('iconPlay');
+    const iconPause     = document.getElementById('iconPause');
     const iosTapOverlay = document.getElementById('iosTapOverlay');
-    const iosTapBtn    = document.getElementById('iosTapBtn');
-    const loaderEl     = document.getElementById('siteLoader');
-    const loaderFill   = document.getElementById('loaderFill');
-    const loaderPct    = document.getElementById('loaderPct');
-    const loadBar      = document.getElementById('loadBar');
+    const iosTapBtn     = document.getElementById('iosTapBtn');
+    const loaderEl      = document.getElementById('siteLoader');
+    const loaderFill    = document.getElementById('loaderFill');
+    const loaderPct     = document.getElementById('loaderPct');
+    const loadBar       = document.getElementById('loadBar');
 
     function updatePlayPauseIcons() {
       if (bgVideo.paused) {
@@ -265,7 +253,7 @@
     bgVideo.addEventListener('play',  updatePlayPauseIcons);
     bgVideo.addEventListener('pause', updatePlayPauseIcons);
 
-    // Video ends — stop and show play icon
+    // Video ends — stop on last frame, show play icon
     bgVideo.addEventListener('ended', () => {
       bgVideo.pause();
       updatePlayPauseIcons();
@@ -273,17 +261,14 @@
 
     updatePlayPauseIcons();
 
-    // ── Loader: 3s minimum + video can play ──
+    // ── Loader: 3s minimum ──
     let timerDone = false;
-    let videoDone = false;
-
     const LOADER_MS   = 3000;
     const loaderStart = performance.now();
 
     function tickLoader() {
-      const elapsed  = performance.now() - loaderStart;
-      const timePct  = Math.min(elapsed / LOADER_MS, 1);
-      // Also use video buffer progress if available
+      const elapsed = performance.now() - loaderStart;
+      const timePct = Math.min(elapsed / LOADER_MS, 1);
       let bufPct = 0;
       if (bgVideo.buffered.length && bgVideo.duration) {
         bufPct = bgVideo.buffered.end(bgVideo.buffered.length - 1) / bgVideo.duration;
@@ -296,10 +281,8 @@
     requestAnimationFrame(tickLoader);
 
     setTimeout(() => { timerDone = true; tryHideLoader(); }, LOADER_MS);
-
-    bgVideo.addEventListener('canplaythrough', () => { videoDone = true; tryHideLoader(); });
-    // Fallback: hide loader on first play event even if canplaythrough is late
-    bgVideo.addEventListener('playing', () => { videoDone = true; tryHideLoader(); });
+    bgVideo.addEventListener('canplaythrough', tryHideLoader);
+    bgVideo.addEventListener('playing',        tryHideLoader);
 
     function tryHideLoader() {
       if (!timerDone) return;
@@ -317,11 +300,10 @@
       }, 200);
     }
 
-    // ── iOS: autoplay may be blocked — show tap overlay ──
+    // ── iOS autoplay blocked → tap overlay ──
     const playPromise = bgVideo.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
-        // Blocked — hide loader, show tap overlay
         if (loaderEl) {
           loaderEl.style.opacity = '0';
           loaderEl.style.pointerEvents = 'none';
@@ -347,15 +329,68 @@
     });
 
     // ═══════════════════════════════════════════════════
-    // BOTTOM NAV
+    // BOTTOM NAV — desktop: full bar | mobile: circle only
     // ═══════════════════════════════════════════════════
-    document.getElementById('bottomNav').addEventListener('click', e => {
-      const item = e.target.closest('.nav-item');
-      if (!item) return;
-      if (item.id === 'nav-home') { window.location.href = 'index.html'; return; }
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      item.classList.add('active');
-    });
+    (function() {
+      const isMobile = window.innerWidth <= 768;
+      const container = document.getElementById('bottomNavContainer');
+
+      if (isMobile) {
+        // ── MOBILE: inject a standalone circle button, no nav bar ──
+        const btn = document.createElement('button');
+        btn.id = 'mobileHomeBtn';
+        btn.setAttribute('aria-label', 'Home');
+        btn.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" width="22" height="22"><path d="M3 9.5L10 3l7 6.5V18H13v-4.5H7V18H3V9.5z"/></svg>';
+        btn.style.cssText = [
+          'position:fixed',
+          'bottom:24px',
+          'left:50%',
+          'transform:translateX(-50%)',
+          'z-index:900',
+          'width:56px',
+          'height:56px',
+          'border-radius:50%',
+          'background:rgba(6,5,4,0.88)',
+          'border:1px solid rgba(200,175,120,0.5)',
+          'box-shadow:0 4px 24px rgba(0,0,0,0.6)',
+          'display:flex',
+          'align-items:center',
+          'justify-content:center',
+          'cursor:pointer',
+          'color:oklch(82% 0.10 78)',
+          'backdrop-filter:blur(20px)',
+          '-webkit-backdrop-filter:blur(20px)',
+          'padding:0',
+          'outline:none',
+          '-webkit-tap-highlight-color:transparent'
+        ].join(';');
+        btn.addEventListener('click', () => { window.location.href = 'index.html'; });
+        btn.addEventListener('touchstart', function() {
+          this.style.background = 'rgba(180,145,70,0.25)';
+          this.style.borderColor = 'rgba(200,175,120,0.8)';
+        }, {passive:true});
+        btn.addEventListener('touchend', function() {
+          this.style.background = 'rgba(6,5,4,0.88)';
+          this.style.borderColor = 'rgba(200,175,120,0.5)';
+        }, {passive:true});
+        container.appendChild(btn);
+
+      } else {
+        // ── DESKTOP: full nav bar ──
+        const nav = document.createElement('div');
+        nav.className = 'bottom-nav';
+        nav.id = 'bottomNav';
+        nav.innerHTML = '<div class="nav-item active" id="nav-home"><svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 9.5L10 3l7 6.5V18H13v-4.5H7V18H3V9.5z"/></svg>Home</div>';
+        nav.addEventListener('click', e => {
+          const item = e.target.closest('.nav-item');
+          if (!item) return;
+          if (item.id === 'nav-home') { window.location.href = 'index.html'; return; }
+          document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+          item.classList.add('active');
+        });
+        container.appendChild(nav);
+      }
+    })();
 
   </script>
 </body>

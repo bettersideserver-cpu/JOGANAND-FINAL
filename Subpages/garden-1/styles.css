@@ -293,12 +293,13 @@
 
   /* ─── BOTTOM NAV ─────────────────────────────────── */
   .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0; height: 68px;
+    position: fixed; bottom:0; left: 0; right: 0;  height: 68px;
     background: rgba(6,5,4,0.85);
     border-top: 1px solid var(--glass-border);
     backdrop-filter: blur(24px); display: flex; align-items: stretch;
-    padding: 0 32px; box-shadow: 0 -8px 40px rgba(0,0,0,0.5); z-index: 20;
+     box-shadow: 0 -8px 40px rgba(0,0,0,0.5); z-index: 20;
     transition: opacity 0.4s ease, transform 0.4s ease;
+    
   }
   .bottom-nav.ui-hidden {
     opacity: 0; pointer-events: none;
@@ -315,9 +316,70 @@
     font-family: 'Jost', sans-serif;
   }
   .nav-item:hover { color: var(--text-primary); }
-  .nav-item.active { color: var(--gold); border-top-color: var(--gold); }
+  .nav-item.active { color: var(--gold); }
   .nav-item .nav-icon { width: 18px; height: 18px; opacity: 0.7; }
   .nav-item.active .nav-icon { opacity: 1; }
+
+  /* ─── MOBILE: floating circle home button ─────────── */
+  @media (max-width: 768px) {
+    .bottom-nav {
+      background: transparent !important;
+      border-top: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow: none !important;
+      padding: 0 16px !important;
+      height: 80px !important;
+      align-items: center !important;
+      justify-content: center !important;
+      pointer-events: none;
+      
+    }
+    .bottom-nav.ui-hidden {
+      transform: translateY(100%);
+    }
+    .bottom-nav .nav-item {
+      flex: none !important;
+      pointer-events: auto;
+      border-top: none !important;
+    }
+ .bottom-nav #nav-home {
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+
+  border-radius: 50% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  flex: 0 0 60px !important;
+  padding: 0 !important;
+
+  background: rgba(6, 5, 4, 0.9) !important;
+  border: 1px solid rgba(200,175,120,.5) !important;
+
+  font-size: 0 !important;
+  overflow: hidden !important;
+}
+.bottom-nav #nav-home .nav-icon {
+  width: 24px !important;
+  height: 24px !important;
+  margin: 0 !important;
+}
+    .bottom-nav #nav-home.active {
+      border-color: rgba(200, 175, 120, 0.75) !important;
+      background: rgba(20, 16, 8, 0.92) !important;
+    }
+    .bottom-nav #nav-home .nav-icon {
+      width: 22px !important;
+      height: 22px !important;
+      margin: 0 !important;
+      opacity: 1 !important;
+    }
+  }
 
   .nav-dropdown {
     position: absolute; bottom: calc(100% + 12px); left: 50%;
@@ -611,9 +673,12 @@
     .slider-tick-label { font-size: 7px; letter-spacing: 0.16em; }
     .slider-tick-line { height: 4px; }
 
-    .bottom-nav { height: 48px; padding: 0 8px; }
+    .bottom-nav {  
+      position: fixed; bottom: 2%; left: 50%; right: 0; width: 50px; height: 50px;
+      border-radius: 50px;}
     .bottom-nav.ui-hidden { transform: translateY(100%); }
-    .nav-item { padding: 0 6px; font-size: 8px; letter-spacing: 0.1em; gap: 2px; }
+    .nav-item { padding: 0 0.09px; font-size: 8px; letter-spacing: 0.1em; gap: 2px;
+     }
     .nav-item .nav-icon { width: 16px; height: 16px; }
 
     .nav-dropdown {
@@ -644,57 +709,3 @@
     .bottom-nav { padding: 0 4px; }
   }
 
-/* --- MOBILE: Home button circle only --- */
-@media (max-width: 768px) {
-  /* Strip the full-width slab */
-  .bottom-nav {
-    background: transparent !important;
-    border-top: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    pointer-events: none;
-  }
-
-  /* Re-enable clicks only on nav items */
-  .bottom-nav .nav-item {
-    pointer-events: auto;
-    flex: none;
-  }
-
-  /* Circle shape for home button */
-  .bottom-nav #nav-home {
-    width: 52px;
-    height: 52px;
-    min-width: 52px;
-    border-radius: 50% !important;
-    padding: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-direction: column !important;
-    font-size: 0 !important;
-    background: rgba(6, 5, 4, 0.85) !important;
-    border: 1px solid rgba(200, 175, 120, 0.4) !important;
-    backdrop-filter: blur(24px) !important;
-    -webkit-backdrop-filter: blur(24px) !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
-    overflow: hidden;
-  }
-
-  .bottom-nav #nav-home.active {
-    border-color: rgba(200, 175, 120, 0.7) !important;
-    background: rgba(20, 16, 8, 0.9) !important;
-  }
-
-  .bottom-nav #nav-home .nav-icon {
-    width: 20px;
-    height: 20px;
-    margin: 0;
-    opacity: 1;
-  }
-}

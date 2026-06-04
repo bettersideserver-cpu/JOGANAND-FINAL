@@ -14,15 +14,7 @@
   <link rel="preload" as="video" href="Subpages/garden-4/scrub.mp4" crossorigin>
 
   <style>
-    /* ── Safe-area insets for notched phones ── */
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      @media (max-width: 768px) {
-        .bottom-nav {
-          padding-bottom: env(safe-area-inset-bottom);
-          height: calc(68px + env(safe-area-inset-bottom));
-        }
-      }
-    }
+    /* safe-area: handled by JS circle button */
 
     /* iOS tap highlight suppression */
     @media (pointer: coarse) { * { -webkit-tap-highlight-color: transparent; } }
@@ -42,8 +34,7 @@
     #playPauseBtn {
       position: fixed;
       bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 24px;
       z-index: 900;
       width: 52px;
       height: 52px;
@@ -63,11 +54,13 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Mobile: smaller button */
+    /* Mobile: smaller button, force circle */
     @media (max-width: 768px) {
       #playPauseBtn {
         width: 40px;
         height: 40px;
+        border-radius: 50% !important;
+        left: 16px;
       }
       #playPauseBtn svg {
         width: 16px;
@@ -85,9 +78,11 @@
     }
 
     #playPauseBtn:active {
-      transform: translateX(-50%) scale(0.91);
+      transform: scale(0.91);
       background: rgba(180, 145, 70, 0.25);
     }
+
+
 
     #playPauseBtn svg {
       width: 22px;
@@ -211,15 +206,8 @@
     </svg>
   </div>
 
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav" id="bottomNav">
-    <div class="nav-item active" id="nav-home">
-      <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3">
-        <path d="M3 9.5L10 3l7 6.5V18H13v-4.5H7V18H3V9.5z" />
-      </svg>
-      Home
-    </div>
-  </div>
+  <!-- BOTTOM NAV: injected by JS (desktop=full bar, mobile=circle) -->
+  <div id="bottomNavContainer"></div>
 
   <script>
     // ═══════════════════════════════════════════════════
@@ -341,15 +329,68 @@
     });
 
     // ═══════════════════════════════════════════════════
-    // BOTTOM NAV
+    // BOTTOM NAV — desktop: full bar | mobile: circle only
     // ═══════════════════════════════════════════════════
-    document.getElementById('bottomNav').addEventListener('click', e => {
-      const item = e.target.closest('.nav-item');
-      if (!item) return;
-      if (item.id === 'nav-home') { window.location.href = 'index.html'; return; }
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      item.classList.add('active');
-    });
+    (function() {
+      const isMobile = window.innerWidth <= 768;
+      const container = document.getElementById('bottomNavContainer');
+
+      if (isMobile) {
+        // ── MOBILE: inject a standalone circle button, no nav bar ──
+        const btn = document.createElement('button');
+        btn.id = 'mobileHomeBtn';
+        btn.setAttribute('aria-label', 'Home');
+        btn.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" width="22" height="22"><path d="M3 9.5L10 3l7 6.5V18H13v-4.5H7V18H3V9.5z"/></svg>';
+        btn.style.cssText = [
+          'position:fixed',
+          'bottom:24px',
+          'left:50%',
+          'transform:translateX(-50%)',
+          'z-index:900',
+          'width:56px',
+          'height:56px',
+          'border-radius:50%',
+          'background:rgba(6,5,4,0.88)',
+          'border:1px solid rgba(200,175,120,0.5)',
+          'box-shadow:0 4px 24px rgba(0,0,0,0.6)',
+          'display:flex',
+          'align-items:center',
+          'justify-content:center',
+          'cursor:pointer',
+          'color:oklch(82% 0.10 78)',
+          'backdrop-filter:blur(20px)',
+          '-webkit-backdrop-filter:blur(20px)',
+          'padding:0',
+          'outline:none',
+          '-webkit-tap-highlight-color:transparent'
+        ].join(';');
+        btn.addEventListener('click', () => { window.location.href = 'index.html'; });
+        btn.addEventListener('touchstart', function() {
+          this.style.background = 'rgba(180,145,70,0.25)';
+          this.style.borderColor = 'rgba(200,175,120,0.8)';
+        }, {passive:true});
+        btn.addEventListener('touchend', function() {
+          this.style.background = 'rgba(6,5,4,0.88)';
+          this.style.borderColor = 'rgba(200,175,120,0.5)';
+        }, {passive:true});
+        container.appendChild(btn);
+
+      } else {
+        // ── DESKTOP: full nav bar ──
+        const nav = document.createElement('div');
+        nav.className = 'bottom-nav';
+        nav.id = 'bottomNav';
+        nav.innerHTML = '<div class="nav-item active" id="nav-home"><svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 9.5L10 3l7 6.5V18H13v-4.5H7V18H3V9.5z"/></svg>Home</div>';
+        nav.addEventListener('click', e => {
+          const item = e.target.closest('.nav-item');
+          if (!item) return;
+          if (item.id === 'nav-home') { window.location.href = 'index.html'; return; }
+          document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+          item.classList.add('active');
+        });
+        container.appendChild(nav);
+      }
+    })();
 
   </script>
 </body>
