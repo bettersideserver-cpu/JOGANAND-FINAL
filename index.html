@@ -235,6 +235,17 @@
   body.desk-open .env-bar {
     bottom: 88px !important;
   }
+  /* Mobile landscape hamburger overrides (landscape phones are >769px wide) */
+  body.mob-controls-open .bottom-nav {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  body.mob-controls-open .search-container {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -950,7 +961,7 @@
     }
 
     /* Mobile landscape overrides */
-    @media (max-height: 500px) and (orientation: landscape) {
+    @media (max-height: 600px) and (orientation: landscape) {
       .search-container {
         top: 8px;
         left: 0;
@@ -1752,7 +1763,7 @@
     /* ══════════════════════════════════════════════════════
        MOBILE LANDSCAPE
     ══════════════════════════════════════════════════════ */
-    @media (max-height: 500px) and (orientation: landscape) {
+    @media (max-height: 600px) and (orientation: landscape) {
       /* === Mobile landscape: swap to mobile scrub video === */
       .bg-video:not(.mobile-bg-video) {
         opacity: 0 !important;
@@ -1779,8 +1790,8 @@
         transition: opacity 0.3s ease;
       }
       body.mob-controls-open .compass {
-        opacity: 1;
-        pointer-events: auto;
+        opacity: 1 !important;
+        pointer-events: auto !important;
       }
 
       .search-container {
@@ -1789,8 +1800,9 @@
         transition: opacity 0.3s ease, transform 0.3s ease;
       }
       body.mob-controls-open .search-container {
-        opacity: 1;
-        pointer-events: auto;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: none !important;
       }
 
       .compass::before {
@@ -1842,9 +1854,9 @@
         transition: opacity 0.3s ease, transform 0.3s ease;
       }
       body.mob-controls-open .bottom-nav {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translateY(0);
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: translateY(0) !important;
       }
 
       .section-display {
@@ -2143,7 +2155,7 @@
       }
     }
 
-    @media (max-height: 500px) and (orientation: landscape) and (max-width: 599px) {
+    @media (max-height: 600px) and (orientation: landscape) and (max-width: 599px) {
       .nav-item {
         font-size: 0;
         gap: 0;
@@ -2443,7 +2455,7 @@
       opacity: 0.85;
     }
 
-    @media (max-height: 500px) and (orientation: landscape) {
+    @media (max-height: 600px) and (orientation: landscape) {
       .plot-info-card {
         width: 220px;
         padding: 12px 14px 12px;
@@ -3209,7 +3221,7 @@
 /* Mobile scrub video: hidden by default everywhere */
 .mobile-bg-video { opacity: 0 !important; }
 
-@media (max-height: 500px) and (orientation: landscape) {
+@media (max-height: 600px) and (orientation: landscape) {
   /* Swap: hide desktop video, show mobile video */
   /* Desktop video always hidden on mobile (src stripped by JS) */
   #bgVideo { opacity: 0 !important; }
@@ -6898,7 +6910,8 @@
     let uiHideTimer = null;
     let uiVisible = true;
     function isMobileLandscape() {
-      return window.innerHeight <= 500 && window.innerWidth > window.innerHeight;
+      var ua = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      return (window.innerHeight <= 600 || (ua && window.innerWidth > window.innerHeight)) && window.innerWidth > window.innerHeight;
     }
     function hideUI() {
       if (!isMobileLandscape()) return;
@@ -6919,8 +6932,8 @@
       if (isMobileLandscape()) uiHideTimer = setTimeout(hideUI, 3000);
     }
     uiToggleBtn.addEventListener('click', function (e) {
-      // All mobile orientations handled by capture-phase listener below
-      if (isMobileLandscape()) return;
+      // Portrait AND landscape handled by capture-phase listener below
+      if (isMobileLandscape() || window.innerWidth <= 1024) return;
       e.stopPropagation();
       if (uiVisible) hideUI(); else showUI();
     });
@@ -6930,10 +6943,11 @@
     // ══════════════════════════════════════════════════════
     (function() {
       function isMobPortrait() {
-        return window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
+        return window.innerWidth <= 1024 && window.innerHeight > window.innerWidth;
       }
       function isMobLandscape() {
-        return window.innerHeight <= 500 && window.innerWidth > window.innerHeight;
+        var ua = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        return (window.innerHeight <= 600 || (ua && window.innerWidth > window.innerHeight)) && window.innerWidth > window.innerHeight;
       }
       function isMobileAny() {
         return isMobPortrait() || isMobLandscape();
@@ -6986,7 +7000,7 @@
       }
 
       // Init: hide navbar + search (hamburger controls it on mobile)
-      if (isMobLandscape()) {
+      if (isMobileAny()) {
         bottomNav.classList.add('ui-hidden');
       }
       if (isMobileAny() && searchContainer) searchContainer.classList.add('ui-hidden');
@@ -6999,7 +7013,8 @@
 
       // Override uiToggleBtn for portrait (capture phase)
       uiToggleBtn.addEventListener('click', function(e) {
-        if (!isMobileAny()) return;
+        var isTouchDevice = ('ontouchstart' in window) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (!isMobileAny() && !isTouchDevice) return;
         e.stopPropagation();
         e.preventDefault();
         if (mobControlsOpen) closeMobControls(); else openMobControls();
